@@ -23,10 +23,18 @@ for(const station of stations){
  }catch(e){console.warn(station.id,e.message)}
  const previous=state[station.id]?.status??'unknown';
  console.log(station.id,previous,'=>',status);
- if(status==='available'&&previous!=='available'){
-  const message='⚡ TOKA #'+station.id+' — '+station.name+'\n🟢 GB/T DC: доступний\n'+station.url;
+ // Send availability changes once; report unavailable/unknown on every scheduled check.
+ let message=null;
+ if(status==='available'&&previous!=='available')
+  message='⚡ TOKA #'+station.id+' — '+station.name+'\n🟢 GB/T DC: доступний\n'+station.url;
+ else if(status==='disabled')
+  message='⚡ TOKA #'+station.id+' — '+station.name+'\n🔴 GB/T DC: відключений (перевірка кожні 5 хв)\n'+station.url;
+ else if(status==='unknown')
+  message='⚡ TOKA #'+station.id+' — '+station.name+'\n⚪ GB/T DC: статус невідомий; доступність не підтверджена\n'+station.url;
+ if(message){
   const r=await fetch('https://api.telegram.org/bot'+token+'/sendMessage',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({chat_id:chatId,text:message})});
-  if(!r.ok)throw Error('Telegram send failed: HTTP '+r.status);
+  const result=await r.json();
+  if(!r.ok||!result.ok)throw Error('Telegram send failed: '+(result.description||r.status));
  }
  // Unknown is not proof of outage; retain last known state to avoid false alerts
  if(status!=='unknown')next[station.id]={status,checkedAt:new Date().toISOString()};
