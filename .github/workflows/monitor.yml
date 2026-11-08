@@ -3,6 +3,11 @@ on:
   schedule:
     - cron: '*/5 * * * *'
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'monitor.mjs'
+      - '.github/workflows/monitor.yml'
 permissions:
   contents: write
 jobs:
