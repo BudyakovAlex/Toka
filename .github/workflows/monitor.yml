@@ -24,6 +24,13 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: node monitor.mjs
+      - name: Test Telegram delivery (manual runs only)
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          node -e 'const t=process.env.TELEGRAM_BOT_TOKEN,c=process.env.TELEGRAM_CHAT_ID;if(!t||!c)throw Error("Missing Telegram secrets");fetch("https://api.telegram.org/bot"+t+"/sendMessage",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({chat_id:c,text:"✅ TOKA Monitor: тестове повідомлення. Telegram підключено!"})}).then(async r=>{const d=await r.json();if(!r.ok||!d.ok)throw Error("Telegram API: "+JSON.stringify({ok:d.ok,error_code:d.error_code,description:d.description}));console.log("Telegram test delivered")}).catch(e=>{console.error(e);process.exit(1)})'
       - name: Persist status
         run: |
           if git diff --quiet -- state.json; then exit 0; fi
