@@ -30,6 +30,8 @@ for(const station of stations){
  let message=null;
  if(status==='available'&&previous!=='available')
   message='⚡ TOKA #'+station.id+' — '+station.name+'\n🟢 '+(station.connector||'GB/T DC')+': доступний\n'+station.url;
+ else if(status==='busy')
+  message='⚡ TOKA #'+station.id+' — '+station.name+'\\n🟠 '+(station.connector||'GB/T DC')+': заряджається / зайнятий\\n'+station.url;
  else if(status==='disabled')
   message='⚡ TOKA #'+station.id+' — '+station.name+'\n🔴 '+(station.connector||'GB/T DC')+': відключений (перевірка кожні 5 хв)\n'+station.url;
  else if(status==='unknown')
